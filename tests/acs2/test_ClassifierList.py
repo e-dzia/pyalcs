@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 import pytest
 
@@ -1248,3 +1248,17 @@ class TestClassifierList:
 
         # `C4` should be subsumer of `child`
         assert abs(0.907987 - c4.q) < 0.01
+
+    def test_should_pick_random_classifier(self, cfg):
+        # given
+        pop = ClassifiersList(cfg=cfg)
+        pop.append(Classifier(action=1, cfg=cfg))
+        pop.append(Classifier(action=2, cfg=cfg))
+        pop.append(Classifier(action=3, cfg=cfg))
+
+        # when
+        random_cl = choice(pop)
+
+        # then
+        assert random_cl is not None
+        assert type(random_cl) is Classifier

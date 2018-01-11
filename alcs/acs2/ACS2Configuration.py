@@ -11,6 +11,7 @@ class ACS2Configuration:
                  performance_fcn_params={},
                  do_ga=False,
                  do_subsumption=True,
+                 do_pees=False,
                  beta=0.05,
                  gamma=0.95,
                  theta_i=0.1,
@@ -39,6 +40,7 @@ class ACS2Configuration:
             calculating agent performance
         :param do_ga: switch *Genetic Generalization* module
         :param do_subsumption:
+        :param do_pees: whether effect part will be enhanced
         :param beta:
         :param gamma:
         :param theta_i:
@@ -63,6 +65,7 @@ class ACS2Configuration:
         self.performance_fcn_params = performance_fcn_params
         self.do_ga = do_ga
         self.do_subsumption = do_subsumption
+        self.do_pees = do_pees
         self.theta_exp = theta_exp
         self.beta = beta
         self.gamma = gamma
@@ -86,6 +89,7 @@ class ACS2Configuration:
                "\n\t- Performance calculation function: [{}] " \
                "\n\t- Do GA: [{}]" \
                "\n\t- Do subsumption: [{}]" \
+               "\n\t- Do PEEs: [{}]" \
                "\n\t- Beta: [{}]" \
                "\n\t- ..." \
                "\n\t- Epsilon: [{}]" \
@@ -99,6 +103,7 @@ class ACS2Configuration:
                     self.performance_fcn,
                     self.do_ga,
                     self.do_subsumption,
+                    self.do_pees,
                     self.beta,
                     self.epsilon,
                     self.u_max)

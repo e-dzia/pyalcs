@@ -1,14 +1,14 @@
 from random import choice
 
 from alcs import Perception
-from alcs.acs2 import Condition
-from alcs.acs2.ACS2Configuration import ACS2Configuration
+from alcs.acs2 import Condition, ACS2Configuration
 
 
 class PMark(list):
     def __init__(self, cfg: ACS2Configuration = None):
         if cfg is None:
             raise TypeError("Configuration should be passed to PMark")
+
         self.cfg = cfg
         list.__init__(self, [set() for _ in range(self.cfg.classifier_length)])
 
@@ -36,6 +36,25 @@ class PMark(list):
                 changed = True
 
         return changed
+
+    def is_equal(self, other) -> bool:
+        """
+        Checks if mark is equal to other mark.
+        """
+        if self.is_empty() and other.is_empty():
+            return True
+
+        for i1, i2 in zip(self, other):
+            if i1 != i2:
+                return False
+
+        return True
+
+    def is_enhanced(self) -> bool:
+        """
+        Enhanced `PMark` occurs when certain mark has more than one value
+        """
+        return any(len(item) > 1 for item in self)
 
     def set_mark_using_condition(self,
                                  condition: Condition,

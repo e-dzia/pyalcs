@@ -17,7 +17,7 @@ class Classifier(object):
                  talp=None,
                  tga=0,
                  tav=0,
-                 cfg=None):
+                 cfg: ACS2Configuration = None):
 
         if cfg is None:
             raise TypeError("Configuration should be passed to Classifier")
@@ -55,8 +55,8 @@ class Classifier(object):
         # Application average
         self.tav = tav
 
-        # I don't know yet what it is
-        self.ee = 0
+        # Enhance effects - should we enhance effects?
+        self.ee = False
 
     def q3num(self):
         return pow(self.q, 3) * self.num
@@ -85,7 +85,9 @@ class Classifier(object):
         :return: new classifier
         """
         new_cls = cls(
-            condition=Condition(old_cls.condition, old_cls.cfg),
+            condition=Condition(old_cls.condition,
+                                elem_type=old_cls.condition.elem_type,
+                                cfg=old_cls.cfg),
             action=old_cls.action,
             effect=old_cls.effect,
             quality=old_cls.q,
@@ -183,6 +185,19 @@ class Classifier(object):
         self.q -= self.cfg.beta * self.q
         return self.q
 
+    def reverse_increase_quality(self) -> float:
+        self.q = (self.q - self.cfg.beta) / (1. - self.cfg.beta)
+        return self.q
+
+    def specialize_with_condition(self, con: Condition):
+        """
+        Specialized all specialized attributes in `con`
+        """
+        for idx, cpi in enumerate(con):
+            if cpi != self.cfg.classifier_wildcard \
+                    and self.condition[idx] != cpi:
+                self.condition[idx] = cpi
+
     def specialize(self,
                    previous_situation: Perception,
                    situation: Perception):
@@ -239,7 +254,7 @@ class Classifier(object):
         :param perception: current situation
         """
         if self.mark.set_mark_using_condition(self.condition, perception):
-            self.ee = 0
+            self.ee = False
 
     def set_alp_timestamp(self, time: int) -> None:
         """
@@ -269,7 +284,12 @@ class Classifier(object):
         diff = self.mark.get_differences(perception)
 
         if diff is None:
+            # No possibility for a further specialization was found
+            if self.cfg.do_pees and self.is_unmarked():
+                self.ee = True
+
             self.increase_quality()
+
             return None
 
         no_spec = self.specified_unchanging_attributes
@@ -332,6 +352,35 @@ class Classifier(object):
             child.q = 0.5
 
         return child
+
+    def merge(self, other, perception: Perception, time: int):
+        """
+        Returns a new classifier that merges this one and cl2.
+        Conditions are specialized in all attributes that are specialized in
+        this condition or the condition of cl2. Effects are merged.
+        The mark of the new classifier stays empty.
+        """
+        new_cl = Classifier(cfg=self.cfg)
+        new_cl.condition = self.condition
+        new_cl.specialize_with_condition(other.condition)
+        new_cl.action = self.action
+        new_cl.effect = Effect()
+        new_cl.mark = PMark()
+
+        new_cl.r = (self.r + other.r) / 2.
+        new_cl.q = (self.q + other.q) / 2.
+
+        if new_cl.q < 0.5:
+            new_cl.q = 0.5
+
+        new_cl.num = 1
+        new_cl.tga = time
+        new_cl.talp = time
+        new_cl.tav = 0
+        new_cl.exp = 1
+        new_cl.ee = False
+
+        return new_cl
 
     def mutate(self, randomfunc=random):
         """
@@ -437,6 +486,12 @@ class Classifier(object):
             return False
 
         return True
+
+    def is_enhanceable(self) -> bool:
+        """
+        Returns whether a classifier effect part can be enhanced
+        """
+        return self.ee
 
     def crossover(self, cl2, samplefunc=sample):
         """

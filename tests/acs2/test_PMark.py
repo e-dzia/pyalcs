@@ -1,8 +1,7 @@
 import pytest
 
-from alcs.acs2 import ACS2Configuration, PMark
-
 from alcs import Perception
+from alcs.acs2 import ACS2Configuration, PMark
 
 
 class TestPMark:
@@ -79,6 +78,53 @@ class TestPMark:
 
         assert 1 == len(mark[6])
         assert '1' in mark[6]
+
+    def test_should_compare_marks_1(self, cfg):
+        # given
+        m1, m2 = PMark(cfg), PMark(cfg)
+        m1[0] = '1'
+        m2[0] = '1'
+
+        # then
+        assert m1.is_equal(m2) is True
+
+    def test_should_compare_marks_2(self, cfg):
+        # given
+        m1, m2 = PMark(cfg), PMark(cfg)
+
+        # then
+        assert m1.is_equal(m2) is True
+
+    def test_should_compare_marks_3(self, cfg):
+        # given
+        m1, m2 = PMark(cfg), PMark(cfg)
+        m1[0] = '1'
+        m1[0] = '0'
+
+        m2[0] = '0'
+        m2[0] = '1'
+
+        # then
+        assert m1.is_equal(m2) is True
+
+    def test_should_compare_marks_4(self, cfg):
+        # given
+        m1, m2 = PMark(cfg), PMark(cfg)
+        m1[0] = '1'
+        m1[0] = '0'
+
+        m2[0] = '0'
+
+        # then
+        assert m1.is_equal(m2) is False
+
+    def test_should_compare_marks_5(self, cfg):
+        # given
+        m1, m2 = PMark(cfg), PMark(cfg)
+        m1[0] = '1'
+
+        # then
+        assert m1.is_equal(m2) is False
 
     def test_should_get_differences_1(self, cfg):
         # Given
@@ -192,3 +238,23 @@ class TestPMark:
 
         # Then
         assert diff is None
+
+    def test_should_detect_enhancement_1(self, cfg):
+        # given
+        mark = PMark(cfg)
+        mark[0] = '0'
+        mark[2] = '1'
+
+        # then
+        assert mark.is_enhanced() is False
+
+    def test_should_detect_enhancement_2(self, cfg):
+        # given
+        mark = PMark(cfg)
+        mark[0] = '0'
+        mark[1] = '0'
+        mark[1] = '1'
+        mark[2] = '1'
+
+        # then
+        assert mark.is_enhanced() is True

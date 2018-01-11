@@ -1,13 +1,38 @@
 from random import sample
 
-from alcs.acs2 import AbstractCondition
+from alcs.acs2 import ACS2Configuration
 
 
-class Condition(AbstractCondition):
+class Condition(list):
     """
     Specifies the set of situations (perceptions) in which the classifier
     can be applied.
     """
+
+    def __init__(self, seq=(), cfg: ACS2Configuration=None):
+        if cfg is None:
+            raise TypeError("Configuration should be passed")
+
+        self.cfg = cfg
+
+        if not seq:
+            list.__init__(
+                self,
+                [self.cfg.classifier_wildcard] * self.cfg.classifier_length)
+        else:
+            list.__init__(self, seq)
+            if len(self) != self.cfg.classifier_length:
+                raise ValueError('Illegal length of condition string')
+
+    def __setitem__(self, idx, value):
+        if not isinstance(value, str):
+            raise TypeError('Invalid type of condition element: [{}]'
+                            .format(value))
+
+        super(Condition, self).__setitem__(idx, value)
+
+    def __repr__(self):
+        return ''.join(map(str, self))
 
     @property
     def specificity(self) -> int:

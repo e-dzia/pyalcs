@@ -31,7 +31,7 @@
 
 #define U_MAX 100000
 
-#define DO_PEES 0
+#define DO_PEES 1
 
 #define DO_MENTAL_ACTING_STEPS 0
 #define DO_LOOKAHEAD_WINNER 0
@@ -56,7 +56,7 @@
 #define DO_SUBSUMPTION 1
 
 /*andere Makros:*/
-#define ENVIRONMENT_CLASS MPEnvironment
+#define ENVIRONMENT_CLASS MazeEnvironment
 #define RESULT_FILE "ACS2_Maze4_5050B050.txt"
 
 #define MAX_STEPS 30000

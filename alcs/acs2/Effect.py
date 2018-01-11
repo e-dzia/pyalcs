@@ -1,12 +1,44 @@
 from alcs import Perception
-from alcs.acs2.AbstractCondition import AbstractCondition
+from alcs.acs2 import ACS2Configuration, EnhancedItem
 
 
-class Effect(AbstractCondition):
+class Effect(list):
     """
     Anticipates the effects that the classifier 'believes'
     to be caused by the specified action.
     """
+
+    def __init__(self, seq=(), cfg: ACS2Configuration = None):
+        if cfg is None:
+            raise TypeError("Configuration should be passed")
+
+        self.cfg = cfg
+        list.__init__(self, [set() for _ in range(self.cfg.classifier_length)])
+
+        if not seq:
+            list.__init__(
+                self, [EnhancedItem(self.cfg.classifier_wildcard, 1.0)]
+                      * self.cfg.classifier_length)
+        else:
+            # We are assuming that no PEEs seq was passed, just
+            # pure string
+            enhanced_seq = [EnhancedItem(i, 1.0) for i in seq]
+            list.__init__(self, enhanced_seq)
+
+            if len(self) != self.cfg.classifier_length:
+                raise ValueError('Illegal length of perception string')
+
+    def __setitem__(self, idx, value):
+        if isinstance(value, str):
+            self[idx].add(EnhancedItem(value, 1.0))
+        elif isinstance(value, EnhancedItem):
+            self[idx].add(value)
+        else:
+            raise TypeError('Invalid type of effect enhanced element: [{}]'
+                            .format(value))
+
+    def __repr__(self):
+        return ''.join(map(str, self))
 
     @property
     def number_of_specified_elements(self) -> int:
@@ -37,7 +69,7 @@ class Effect(AbstractCondition):
                     return False
             else:
                 if (item != situation[idx] or
-                        previous_situation[idx] == situation[idx]):
+                            previous_situation[idx] == situation[idx]):
                     return False
 
         return True

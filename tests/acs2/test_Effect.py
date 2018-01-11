@@ -15,13 +15,13 @@ class TestEffect:
         assert len(effect) > 0
 
     def test_should_get_initialized_with_str_1(self, cfg):
-        effect = Effect("#1O##O##", cfg)
+        effect = Effect("#1O##O##", cfg=cfg)
         assert 8 == len(effect)
 
     def test_should_get_initialized_with_str_2(self, cfg):
         with pytest.raises(ValueError):
             # Too short effect
-            Effect("#1O##O#", cfg)
+            Effect("#1O##O#", cfg=cfg)
 
     def test_should_set_effect_with_non_string_char(self, cfg):
         effect = Effect(cfg=cfg)
@@ -44,7 +44,7 @@ class TestEffect:
         # should predict correctly
 
         # given
-        effect = Effect('########', cfg)
+        effect = Effect('########', cfg=cfg)
         p0 = Perception('00001111')
         p1 = Perception('00001111')
 
@@ -59,7 +59,7 @@ class TestEffect:
         # also predict correctly)
 
         # given
-        effect = Effect(['#', '1', '#', '#', '#', '#', '0', '#'], cfg)
+        effect = Effect(['#', '1', '#', '#', '#', '#', '0', '#'], cfg=cfg)
         p0 = Perception(['0', '0', '0', '0', '1', '1', '1', '1'])
         p1 = Perception(['0', '1', '0', '0', '1', '1', '0', '1'])
 
@@ -73,7 +73,7 @@ class TestEffect:
         # Case when effect predicts situation incorrectly
 
         # given
-        effect = Effect(['#', '0', '#', '#', '#', '#', '#', '#'], cfg)
+        effect = Effect(['#', '0', '#', '#', '#', '#', '#', '#'], cfg=cfg)
         p0 = Perception(['0', '0', '0', '0', '1', '1', '1', '1'])
         p1 = Perception(['0', '1', '0', '0', '1', '1', '1', '1'])
 
@@ -87,7 +87,7 @@ class TestEffect:
         # Case when effect predicts situation incorrectly
 
         # given
-        effect = Effect(['#', '#', '0', '#', '#', '1', '#', '#'], cfg)
+        effect = Effect(['#', '#', '0', '#', '#', '1', '#', '#'], cfg=cfg)
         p0 = Perception(['1', '0', '1', '0', '1', '0', '0', '1'])
         p1 = Perception(['1', '0', '1', '0', '1', '0', '0', '1'])
 
@@ -101,7 +101,7 @@ class TestEffect:
         # Case when effect predicts situation incorrectly
 
         # given
-        effect = Effect(['#', '#', '#', '#', '1', '#', '0', '#'], cfg)
+        effect = Effect(['#', '#', '#', '#', '1', '#', '0', '#'], cfg=cfg)
         p0 = Perception(['0', '1', '1', '0', '0', '0', '1', '1'])
         p1 = Perception(['1', '1', '1', '0', '1', '1', '0', '1'])
 
@@ -115,7 +115,7 @@ class TestEffect:
         # Case when effect predicts situation incorrectly
 
         # given
-        effect = Effect(['#', '#', '1', '#', '0', '#', '0', '#'], cfg)
+        effect = Effect(['#', '#', '1', '#', '0', '#', '0', '#'], cfg=cfg)
         p0 = Perception(['0', '0', '0', '1', '1', '0', '1', '0'])
         p1 = Perception(['0', '0', '1', '1', '0', '0', '0', '0'])
 
@@ -130,7 +130,7 @@ class TestEffect:
         # pass-through symbol
 
         # given
-        effect = Effect(['#', '0', '#', '#', '#', '#', '#', '#'], cfg)
+        effect = Effect(['#', '0', '#', '#', '#', '#', '#', '#'], cfg=cfg)
         p0 = Perception(['0', '0', '0', '0', '1', '1', '1', '1'])
         p1 = Perception(['0', '0', '0', '0', '1', '1', '1', '1'])
 
@@ -144,7 +144,7 @@ class TestEffect:
         # given
         p0 = Perception(['1', '1', '0', '0', '0', '0', '1', '0'])
         p1 = Perception(['1', '1', '1', '0', '1', '1', '0', '1'])
-        effect = Effect(['#', '#', '#', '#', '#', '#', '#', '#'], cfg)
+        effect = Effect(['#', '#', '#', '#', '#', '#', '#', '#'], cfg=cfg)
 
         # when
         res = effect.is_specializable(p0, p1)
@@ -156,7 +156,7 @@ class TestEffect:
         # given
         p0 = Perception(['0', '1', '1', '0', '0', '0', '1', '1'])
         p1 = Perception(['1', '1', '0', '0', '0', '0', '1', '0'])
-        effect = Effect(['#', '#', '#', '#', '#', '#', '#', '#'], cfg)
+        effect = Effect(['#', '#', '#', '#', '#', '#', '#', '#'], cfg=cfg)
 
         # when
         res = effect.is_specializable(p0, p1)
@@ -168,7 +168,7 @@ class TestEffect:
         # given
         p0 = Perception(['1', '1', '1', '1', '0', '1', '1', '1'])
         p1 = Perception(['1', '0', '0', '0', '0', '0', '0', '0'])
-        effect = Effect(['#', '#', '0', '0', '#', '0', '#', '#'], cfg)
+        effect = Effect(['#', '#', '0', '0', '#', '0', '#', '#'], cfg=cfg)
 
         # when
         res = effect.is_specializable(p0, p1)
@@ -180,7 +180,7 @@ class TestEffect:
         # given
         p0 = Perception(['1', '0', '0', '0', '0', '0', '0', '1'])
         p1 = Perception(['1', '0', '0', '0', '1', '0', '1', '1'])
-        effect = Effect(['0', '#', '#', '#', '#', '1', '#', '#'], cfg)
+        effect = Effect(['0', '#', '#', '#', '#', '1', '#', '#'], cfg=cfg)
 
         # when
         res = effect.is_specializable(p0, p1)
@@ -192,7 +192,7 @@ class TestEffect:
         # given
         p0 = Perception(['1', '1', '1', '1', '0', '1', '1', '1'])
         p1 = Perception(['1', '0', '1', '1', '1', '1', '1', '1'])
-        effect = Effect(['#', '0', '1', '0', '#', '0', '1', '0'], cfg)
+        effect = Effect(['#', '0', '1', '0', '#', '0', '1', '0'], cfg=cfg)
 
         # when
         res = effect.is_specializable(p0, p1)
@@ -204,7 +204,7 @@ class TestEffect:
         # given
         p0 = Perception(['0', '0', '1', '1', '0', '0', '0', '0'])
         p1 = Perception(['0', '0', '1', '1', '0', '0', '0', '0'])
-        effect = Effect(['#', '1', '0', '#', '#', '#', '1', '1'], cfg)
+        effect = Effect(['#', '1', '0', '#', '#', '#', '1', '1'], cfg=cfg)
 
         # when
         res = effect.is_specializable(p0, p1)
@@ -216,7 +216,7 @@ class TestEffect:
         # given
         p0 = Perception(['0', '1', '1', '0', '0', '0', '0', '0'])
         p1 = Perception(['1', '1', '0', '1', '1', '1', '0', '1'])
-        effect = Effect(['#', '#', '0', '#', '#', '1', '#', '#'], cfg)
+        effect = Effect(['#', '#', '0', '#', '#', '1', '#', '#'], cfg=cfg)
 
         # when
         res = effect.is_specializable(p0, p1)
@@ -225,5 +225,5 @@ class TestEffect:
         assert res is True
 
     def test_eq(self, cfg):
-        assert Effect('00001111', cfg) == Effect('00001111', cfg)
-        assert Effect('00001111', cfg) != Effect('0000111#', cfg)
+        assert Effect('00001111', cfg=cfg) == Effect('00001111', cfg=cfg)
+        assert Effect('00001111', cfg=cfg) != Effect('0000111#', cfg=cfg)

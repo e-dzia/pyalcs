@@ -2,10 +2,9 @@ import logging
 from itertools import groupby, chain
 from random import random, randint, choice, sample
 
-from alcs.acs2 import Classifier
-
-from alcs.acs2 import ACS2Configuration
 from alcs import Perception
+from alcs.acs2 import ACS2Configuration
+from alcs.acs2 import Classifier
 
 
 class ClassifiersList(list):
@@ -13,7 +12,7 @@ class ClassifiersList(list):
     Represents overall population, match/action sets
     """
 
-    def __init__(self, seq=(), cfg=None):
+    def __init__(self, seq=(), cfg: ACS2Configuration = None):
         if cfg is None:
             raise TypeError("Configuration should be passed to ClassifierList")
         self.cfg = cfg
@@ -230,6 +229,11 @@ class ClassifiersList(list):
                 new_cl.tga = time
                 self.add_alp_classifier(new_cl, new_list)
 
+        # Look for possible effect part enhancements if activated
+        if self.cfg.do_pees:
+            self.apply_enhanced_effect_part_check(
+                new_list, previous_situation, time)
+
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
             new_cl = Classifier.cover_triple(previous_situation,
@@ -354,6 +358,37 @@ class ClassifiersList(list):
         else:
             old_cl.increase_quality()
 
+    def apply_enhanced_effect_part_check(self, new_list, situation, time):
+        """
+        Check if effect parts need to be enhanced to cope with 
+        stochastic environments. Actual enhancements are added to `new_list`.
+        :param new_list: 
+        :param situation: 
+        :param time: 
+        :return: 
+        """
+        candidates = [cl for cl in self if cl.is_enhanceable()]
+        if len(candidates) < 2:
+            return
+
+        for cl in candidates:
+            temp_candidates = ClassifiersList(self.cfg)
+            temp_candidates_count = 0
+
+            for cl2 in candidates:
+                if cl != cl2 and not cl.mark.is_enhanced() \
+                        and cl.mark.is_equal(cl2.mark):
+                    temp_candidates.append(cl)
+                    temp_candidates_count += 1
+
+            if temp_candidates_count > 0:
+                merger = choice(temp_candidates)
+                new_cl = cl.merge(merger, situation, time)
+
+                if new_cl is not None:
+                    cl.reverse_increase_quality()
+                    self.add_alp_classifier(new_cl, new_list)
+
     def get_similar(self, other: Classifier) -> Classifier:
         """
         Searches for the first similar classifier `other` and returns it.
@@ -435,7 +470,6 @@ class ClassifiersList(list):
             # There is still room for more classifiers
             return
 
-        # print("GA: requested to delete: %d classifiers", del_no)
         for _ in range(0, del_no):
             self.delete_a_classifier(
                 match_set, population, randomfunc=randomfunc)

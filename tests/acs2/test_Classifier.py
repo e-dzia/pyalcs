@@ -20,7 +20,7 @@ class TestClassifier:
 
     def test_mutate_1(self, cfg):
         # given
-        cls = Classifier(Condition('##011###', cfg), cfg=cfg)
+        cls = Classifier(Condition('##011###', cfg=cfg), cfg=cfg)
         s = cfg.mu * 0.5  # less then MU
         b = 1 - (1 - cfg.mu) * 0.5  # more then MU
 
@@ -28,11 +28,11 @@ class TestClassifier:
         cls.mutate(randomfunc=RandomMock([s, b, b]))
 
         # then
-        assert Condition('###11###', cfg) == cls.condition
+        assert Condition('###11###', cfg=cfg) == cls.condition
 
     def test_mutate_2(self, cfg):
         # given
-        cls = Classifier(Condition('##011###', cfg), cfg=cfg)
+        cls = Classifier(Condition('##011###', cfg=cfg), cfg=cfg)
         s = cfg.mu * 0.5  # less then MU
         b = 1 - (1 - cfg.mu) * 0.5  # more then MU
 
@@ -40,7 +40,7 @@ class TestClassifier:
         cls.mutate(randomfunc=RandomMock([b, b, s]))
 
         # then
-        assert Condition('##01####', cfg) == cls.condition
+        assert Condition('##01####', cfg=cfg) == cls.condition
 
     def test_should_calculate_fitness(self, cfg):
         # given
@@ -63,7 +63,7 @@ class TestClassifier:
     def test_should_anticipate_correctly(self, cfg):
         # given
         cls = Classifier(
-            effect=Effect('#1####0#', cfg),
+            effect=Effect('#1####0#', cfg=cfg),
             cfg=cfg)
         p0 = Perception('00001111')
         p1 = Perception('01001101')
@@ -78,7 +78,7 @@ class TestClassifier:
     def test_should_calculate_specificity_2(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('#1#01#0#', cfg),
+            condition=Condition('#1#01#0#', cfg=cfg),
             cfg=cfg)
 
         # then
@@ -87,7 +87,7 @@ class TestClassifier:
     def test_should_calculate_specificity_3(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('11101001', cfg),
+            condition=Condition('11101001', cfg=cfg),
             cfg=cfg)
 
         # then
@@ -171,6 +171,18 @@ class TestClassifier:
         # then
         assert abs(0.45 - cls.q) < 0.01
 
+    def test_should_reverse_increase_quality(self, cfg):
+        # given
+        q_init = 0.5
+        cls = Classifier(quality=q_init, cfg=cfg)
+
+        # when
+        cls.increase_quality()
+        cls.reverse_increase_quality()
+
+        # then
+        assert abs(cls.q == q_init) < 0.0001
+
     def test_should_cover_triple(self, cfg):
         # given
         action_no = 2
@@ -182,9 +194,9 @@ class TestClassifier:
         new_cl = Classifier.cover_triple(p0, action_no, p1, time, cfg)
 
         # then
-        assert Condition('#1#0##0#', cfg) == new_cl.condition
+        assert Condition('#1#0##0#', cfg=cfg) == new_cl.condition
         assert 2 == new_cl.action
-        assert Effect('#0#1##1#', cfg) == new_cl.effect
+        assert Effect('#0#1##1#', cfg=cfg) == new_cl.effect
         assert 0.5 == new_cl.q
         assert 0.5 == new_cl.r
         assert 0 == new_cl.ir
@@ -204,8 +216,8 @@ class TestClassifier:
         cls.specialize(p0, p1)
 
         # then
-        assert Condition('########', cfg) == cls.condition
-        assert Effect('########', cfg) == cls.effect
+        assert Condition('########', cfg=cfg) == cls.condition
+        assert Effect('########', cfg=cfg) == cls.effect
 
     def test_should_specialize_2(self, cfg):
         # given
@@ -217,14 +229,14 @@ class TestClassifier:
         cls.specialize(p0, p1)
 
         # then
-        assert Condition('###0####', cfg) == cls.condition
-        assert Effect('###1####', cfg) == cls.effect
+        assert Condition('###0####', cfg=cfg) == cls.condition
+        assert Effect('###1####', cfg=cfg) == cls.effect
 
     def test_should_specialize_3(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('01#####1', cfg),
-            effect=Effect('10#####0', cfg),
+            condition=Condition('01#####1', cfg=cfg),
+            effect=Effect('10#####0', cfg=cfg),
             cfg=cfg)
         p0 = Perception('01110111')
         p1 = Perception('10101010')
@@ -234,16 +246,55 @@ class TestClassifier:
 
         # then
         assert 6 == cls.condition.specificity
-        assert Condition('01#101#1', cfg) == cls.condition
+        assert Condition('01#101#1', cfg=cfg) == cls.condition
 
         assert 6 == cls.effect.number_of_specified_elements
-        assert Effect('10#010#0', cfg) == cls.effect
+        assert Effect('10#010#0', cfg=cfg) == cls.effect
+
+    def test_should_specialize_with_condition_1(self, cfg):
+        # given
+        con = Condition('01####11', cfg=cfg)
+        cls = Classifier(
+            condition=Condition('01#####1', cfg=cfg),
+            cfg=cfg)
+
+        # when
+        cls.specialize_with_condition(con)
+
+        # then
+        assert Condition('01####11', cfg=cfg) == cls.condition
+
+    def test_should_specialize_with_condition_2(self, cfg):
+        # given
+        con = Condition('########', cfg=cfg)
+        cls = Classifier(
+            condition=Condition('01#####1', cfg=cfg),
+            cfg=cfg)
+
+        # when
+        cls.specialize_with_condition(con)
+
+        # then
+        assert Condition('01#####1', cfg=cfg) == cls.condition
+
+    def test_should_specialize_with_condition_3(self, cfg):
+        # given
+        con = Condition('01#####1', cfg=cfg)
+        cls = Classifier(
+            condition=Condition('########', cfg=cfg),
+            cfg=cfg)
+
+        # when
+        cls.specialize_with_condition(con)
+
+        # then
+        assert Condition('01#####1', cfg=cfg) == cls.condition
 
     def test_should_count_specified_unchanging_attributes_1(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('######0#', cfg),
-            effect=Effect('########', cfg),
+            condition=Condition('######0#', cfg=cfg),
+            effect=Effect('########', cfg=cfg),
             cfg=cfg
         )
 
@@ -253,8 +304,8 @@ class TestClassifier:
     def test_should_count_specified_unchanging_attributes_2(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('#####0#0', cfg),
-            effect=Effect('########', cfg),
+            condition=Condition('#####0#0', cfg=cfg),
+            effect=Effect('########', cfg=cfg),
             cfg=cfg
         )
 
@@ -264,8 +315,8 @@ class TestClassifier:
     def test_should_count_specified_unchanging_attributes_3(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('10000001', cfg),
-            effect=Effect('####1#1#', cfg),
+            condition=Condition('10000001', cfg=cfg),
+            effect=Effect('####1#1#', cfg=cfg),
             cfg=cfg
         )
 
@@ -275,8 +326,8 @@ class TestClassifier:
     def test_should_count_specified_unchanging_attributes_4(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('1#0#1011', cfg),
-            effect=Effect('0####1##', cfg),
+            condition=Condition('1#0#1011', cfg=cfg),
+            effect=Effect('0####1##', cfg=cfg),
             cfg=cfg
         )
         # when & then
@@ -285,8 +336,8 @@ class TestClassifier:
     def test_should_count_specified_unchanging_attributes_5(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('1###1011', cfg),
-            effect=Effect('0####1##', cfg),
+            condition=Condition('1###1011', cfg=cfg),
+            effect=Effect('0####1##', cfg=cfg),
             cfg=cfg
         )
 
@@ -296,7 +347,7 @@ class TestClassifier:
     def test_should_handle_expected_case_1(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('#######0', cfg),
+            condition=Condition('#######0', cfg=cfg),
             quality=0.525,
             cfg=cfg)
         p0 = Perception('11111010')
@@ -312,7 +363,7 @@ class TestClassifier:
     def test_should_handle_expected_case_2(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('#0######', cfg),
+            condition=Condition('#0######', cfg=cfg),
             quality=0.521,
             cfg=cfg)
         p0 = Perception('10101001')
@@ -350,7 +401,7 @@ class TestClassifier:
         assert new_cls is not None
         # One `random` attribute gets specified
         assert 1 == new_cls.condition.specificity
-        assert Effect('########', cfg) == new_cls.effect
+        assert Effect('########', cfg=cfg) == new_cls.effect
         assert 5 == new_cls.action
         assert new_cls.mark.is_empty() is True
         assert 0.5 == new_cls.q
@@ -360,9 +411,9 @@ class TestClassifier:
         p0 = Perception('11101101')
         time = 703
         cls = Classifier(
-            condition=Condition('1##01#0#', cfg),
+            condition=Condition('1##01#0#', cfg=cfg),
             action=7,
-            effect=Effect('0##10#1#', cfg),
+            effect=Effect('0##10#1#', cfg=cfg),
             quality=0.47,
             cfg=cfg
         )
@@ -378,7 +429,7 @@ class TestClassifier:
         assert new_cls is not None
         # One `random` attribute gets specified
         assert 5 == new_cls.condition.specificity
-        assert Effect('0##10#1#', cfg) == new_cls.effect
+        assert Effect('0##10#1#', cfg=cfg) == new_cls.effect
         assert 7 == new_cls.action
         assert new_cls.mark.is_empty() is True
         assert 0.5 == new_cls.q
@@ -413,9 +464,9 @@ class TestClassifier:
         assert cls is not new_cls
 
         # Check attributes of a new classifier
-        assert Condition('01####0#', cfg) == new_cls.condition
+        assert Condition('01####0#', cfg=cfg) == new_cls.condition
         assert 2 == new_cls.action
-        assert Effect('10####1#', cfg) == new_cls.effect
+        assert Effect('10####1#', cfg=cfg) == new_cls.effect
 
         # There should be no mark
         for mark_attrib in new_cls.mark:
@@ -429,7 +480,7 @@ class TestClassifier:
     def test_should_handle_unexpected_case_2(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('#######0', cfg),
+            condition=Condition('#######0', cfg=cfg),
             action=4,
             quality=0.4,
             cfg=cfg)
@@ -449,8 +500,8 @@ class TestClassifier:
         new_cl = cls.unexpected_case(p0, p1, time)
 
         # then
-        assert new_cl.condition == Condition('#110#010', cfg)
-        assert new_cl.effect == Effect('#001#101', cfg)
+        assert new_cl.condition == Condition('#110#010', cfg=cfg)
+        assert new_cl.effect == Effect('#001#101', cfg=cfg)
         assert new_cl.mark.is_empty() is True
         assert time == new_cl.tga
         assert time == new_cl.talp
@@ -458,8 +509,8 @@ class TestClassifier:
 
     def test_should_handle_unexpected_case_3(self, cfg):
         cls = Classifier(
-            condition=Condition('#####1#0', cfg),
-            effect=Effect('#####0#1', cfg),
+            condition=Condition('#####1#0', cfg=cfg),
+            effect=Effect('#####0#1', cfg=cfg),
             quality=0.475,
             cfg=cfg
         )
@@ -493,7 +544,7 @@ class TestClassifier:
 
         operation_time = 123
         original_cl = Classifier(
-            condition=Condition('1###1011', cfg),
+            condition=Condition('1###1011', cfg=cfg),
             cfg=cfg
         )
 
@@ -503,22 +554,22 @@ class TestClassifier:
         copied_cl.mutate(RandomMock([s, b, b, b, b]))
 
         # then
-        assert Condition('####1011', cfg) == copied_cl.condition
-        assert Condition('1###1011', cfg) == original_cl.condition
+        assert Condition('####1011', cfg=cfg) == copied_cl.condition
+        assert Condition('1###1011', cfg=cfg) == original_cl.condition
 
         # when
         original_cl.mutate(RandomMock([b, s, b, b, b]))
 
         # then
-        assert Condition('1####011', cfg) == original_cl.condition
-        assert Condition('####1011', cfg) == copied_cl.condition
+        assert Condition('1####011', cfg=cfg) == original_cl.condition
+        assert Condition('####1011', cfg=cfg) == copied_cl.condition
 
     def test_should_handle_unexpected_case_5(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('00####1#', cfg),
+            condition=Condition('00####1#', cfg=cfg),
             action=2,
-            effect=Effect('########', cfg),
+            effect=Effect('########', cfg=cfg),
             quality=0.129,
             reward=341.967,
             intermediate_reward=130.369,
@@ -543,8 +594,8 @@ class TestClassifier:
 
         # then
         assert new_cls is not None
-        assert Condition('0021#01#', cfg) == new_cls.condition
-        assert Effect('##00#1##', cfg) == new_cls.effect
+        assert Condition('0021#01#', cfg=cfg) == new_cls.condition
+        assert Effect('##00#1##', cfg=cfg) == new_cls.effect
         assert abs(0.5 - new_cls.q) < 0.1
         assert abs(341.967 - new_cls.r) < 0.1
         assert abs(130.369 - new_cls.ir) < 0.1
@@ -557,9 +608,9 @@ class TestClassifier:
     def test_should_handle_unexpected_case_6(self, cfg):
         # given
         cls = Classifier(
-            condition=Condition('0#1####1', cfg),
+            condition=Condition('0#1####1', cfg=cfg),
             action=2,
-            effect=Effect('1#0####0', cfg),
+            effect=Effect('1#0####0', cfg=cfg),
             quality=0.38505,
             reward=1.20898,
             intermediate_reward=0,
@@ -584,8 +635,8 @@ class TestClassifier:
 
         # then
         assert new_cls is not None
-        assert Condition('0#1###01', cfg) == new_cls.condition
-        assert Effect('1#0###10', cfg) == new_cls.effect
+        assert Condition('0#1###01', cfg=cfg) == new_cls.condition
+        assert Effect('1#0###10', cfg=cfg) == new_cls.effect
         assert abs(0.5 - new_cls.q) < 0.1
         assert abs(1.20898 - new_cls.r) < 0.1
         assert abs(0 - new_cls.ir) < 0.1
@@ -601,7 +652,7 @@ class TestClassifier:
         # given
         operation_time = 123
         original_cl = Classifier(
-            effect=Effect('10####1#', cfg),
+            effect=Effect('10####1#', cfg=cfg),
             cfg=cfg)
 
         # when
@@ -609,13 +660,13 @@ class TestClassifier:
 
         # when & then
         copied_cl.effect[2] = '1'
-        assert Effect('101###1#', cfg) == copied_cl.effect
-        assert Effect('10####1#', cfg) == original_cl.effect
+        assert Effect('101###1#', cfg=cfg) == copied_cl.effect
+        assert Effect('10####1#', cfg=cfg) == original_cl.effect
 
         # when & then
         original_cl.effect[3] = '0'
-        assert Effect('101###1#', cfg) == copied_cl.effect
-        assert Effect('10#0##1#', cfg) == original_cl.effect
+        assert Effect('101###1#', cfg=cfg) == copied_cl.effect
+        assert Effect('10#0##1#', cfg=cfg) == original_cl.effect
 
     def test_should_copy_classifier(self, cfg):
         # given
@@ -1149,4 +1200,4 @@ class TestClassifier:
         # then
         assert generalized is True
         assert 1 == cls.specified_unchanging_attributes
-        assert Condition('#####0##', cfg) == cls.condition
+        assert Condition('#####0##', cfg=cfg) == cls.condition
