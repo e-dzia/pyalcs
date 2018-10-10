@@ -1,5 +1,6 @@
 # Plot constants
 import datetime
+import os
 
 import gym
 import gym_handeye
@@ -9,6 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+import sys
 
 from examples.acs2.handeye.utils import calculate_performance
 
@@ -199,10 +201,22 @@ def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
 
 
 if __name__ == "__main__":
-    env_name = 'HandEye3-v0'
-    number_of_tests = 1
-    number_of_trials_explore = 15
-    number_of_trials_exploit = 10
+    if len(sys.argv) < 5:
+        print("Not enough args provided, using the defaults.")
+        env_name = 'HandEye3-v0'
+        number_of_tests = 100
+        number_of_trials_explore = 50
+        number_of_trials_exploit = 10
+    else:
+        env_name = sys.argv[1]
+        number_of_tests = int(sys.argv[2])
+        number_of_trials_explore = int(sys.argv[3])
+        number_of_trials_exploit = int(sys.argv[4])
+
+    print(env_name, number_of_tests, number_of_trials_explore,
+          number_of_trials_exploit)
+
+    os.chdir("/".join(sys.argv[0].split("/")[:-1]))
 
     start = datetime.datetime.now()
     print("time start: {}".format(start))
