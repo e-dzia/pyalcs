@@ -216,7 +216,7 @@ if __name__ == "__main__":
     print(env_name, number_of_tests, number_of_trials_explore,
           number_of_trials_exploit)
 
-    os.chdir("/".join(sys.argv[0].split("/")[:-1]))
+    #os.chdir("/".join(sys.argv[0].split("/")[:-1]))
 
     start = datetime.datetime.now()
     print("time start: {}".format(start))
