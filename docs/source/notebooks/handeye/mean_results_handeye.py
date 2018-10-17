@@ -213,8 +213,9 @@ if __name__ == "__main__":
         number_of_trials_explore = int(sys.argv[3])
         number_of_trials_exploit = int(sys.argv[4])
 
-    print(env_name, number_of_tests, number_of_trials_explore,
-          number_of_trials_exploit)
+    print("Env: {}, Experiments: {}, Explore: {}, Exploit: {}".format(
+          env_name, number_of_tests, number_of_trials_explore,
+          number_of_trials_exploit))
 
     #os.chdir("/".join(sys.argv[0].split("/")[:-1]))
 
