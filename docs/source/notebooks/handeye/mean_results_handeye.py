@@ -190,14 +190,14 @@ def plot_handeye_mean(number_of_tests=50, env_name='HandEye3-v0',
     plot_performance(he_metrics_df, env_name,
                      '\nmean for {} experiments'.format(number_of_tests),
                      with_ap)
-    plt.savefig(filename.replace(" ", "_"), format='pdf', dpi=100)
+    plt.savefig(filename.replace(" ", "_").replace(":", "-"), format='pdf', dpi=100)
     return he_metrics_df
 
 
 def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
     plot_both_performances(metrics_ap, metrics_no_ap, env_name,
                            '\nmean for {} experiments'.format(number_of_tests))
-    plt.savefig(filename.replace(" ", "_"), format='pdf', dpi=100)
+    plt.savefig(filename.replace(" ", "_").replace(":", "-"), format='pdf', dpi=100)
 
 
 if __name__ == "__main__":
@@ -245,8 +245,9 @@ if __name__ == "__main__":
 
     metrics_ap.to_csv('mean_results/{}_ap_{}_{}.csv'.
                       format(env_name, number_of_tests, start).
-                      replace(' ', '_'))
+                      replace(' ', '_').replace(":", "-"))
 
     metrics_no_ap.to_csv('mean_results/{}_no_ap_{}_{}.csv'.
                          format(env_name, number_of_tests, start).
-                         replace(' ', '_'))
+                         replace(' ', '_').replace(":", "-"))
+
