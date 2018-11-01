@@ -150,7 +150,7 @@ def plot_handeye_mean(number_of_tests=50, env_name='BMaze4-v0',
                         epsilon=1.0,
                         do_ga=False,
                         do_action_planning=do_action_planning,
-                        action_planning_frequency=10,
+                        action_planning_frequency=20,
                         performance_fcn=calculate_performance)
 
     mean_metrics_he_exploit = []
@@ -185,14 +185,16 @@ def plot_handeye_mean(number_of_tests=50, env_name='BMaze4-v0',
     plot_performance(he_metrics_df, env_name,
                      '\nmean for {} experiments'.format(number_of_tests),
                      with_ap)
-    plt.savefig(filename.replace(" ", "_"), format='pdf', dpi=100)
+    plt.savefig(filename.replace(" ", "_").replace(':', '.'),
+                format='pdf', dpi=100)
     return he_metrics_df
 
 
 def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
     plot_both_performances(metrics_ap, metrics_no_ap, env_name,
                            '\nmean for {} experiments'.format(number_of_tests))
-    plt.savefig(filename.replace(" ", "_"), format='pdf', dpi=100)
+    plt.savefig(filename.replace(" ", "_").replace(':', '.'),
+                format='pdf', dpi=100)
 
 
 if __name__ == "__main__":
@@ -218,7 +220,7 @@ if __name__ == "__main__":
     print("time start: {}".format(start))
 
     metrics_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/{}_ap_{}_{}.pdf'
+        number_of_tests, env_name, 'mean_results/bf{}_ap_{}_{}.pdf'
         .format(env_name, number_of_tests, start).replace(' ', '_').
         replace(':', '.'), do_action_planning=True,
         number_of_trials_explore=number_of_trials_explore,
@@ -228,7 +230,7 @@ if __name__ == "__main__":
     print("done with AP, time: {}, elapsed: {}".format(middle, middle - start))
 
     metrics_no_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/{}_no_ap_{}_{}.pdf'.
+        number_of_tests, env_name, 'mean_results/bf{}_no_ap_{}_{}.pdf'.
         format(env_name, number_of_tests, start).replace(' ', '_').
         replace(':', '.'), do_action_planning=False,
         number_of_trials_explore=number_of_trials_explore,
@@ -237,14 +239,14 @@ if __name__ == "__main__":
     end = datetime.datetime.now()
     print("done without AP, time: {}, elapsed: {}".format(end, end - middle))
 
-    plot_with_without_ap('mean_results/{}_both_{}_{}.pdf'.format(
+    plot_with_without_ap('mean_results/bf{}_both_{}_{}.pdf'.format(
         env_name, number_of_tests, start).replace(' ', '_').replace(':', '.'),
                          metrics_ap, metrics_no_ap)
 
-    metrics_ap.to_csv('mean_results/{}_ap_{}_{}.csv'.
+    metrics_ap.to_csv('mean_results/bf{}_ap_{}_{}.csv'.
                       format(env_name, number_of_tests, start).
                       replace(' ', '_').replace(':', '.'))
 
-    metrics_no_ap.to_csv('mean_results/{}_no_ap_{}_{}.csv'.
+    metrics_no_ap.to_csv('mean_results/bf{}_no_ap_{}_{}.csv'.
                          format(env_name, number_of_tests, start).
                          replace(' ', '_').replace(':', '.'))
