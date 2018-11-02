@@ -334,6 +334,7 @@ class ACS2(Agent):
                 prev_state = state
                 state = parse_state(raw_state)
 
+                reward += 100
                 if not exists_classifier(action_set, Perception(prev_state),
                                          action, Perception(state),
                                          self.cfg.theta_r):

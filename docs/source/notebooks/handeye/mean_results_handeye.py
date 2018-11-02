@@ -223,7 +223,7 @@ if __name__ == "__main__":
     print("time start: {}".format(start))
 
     metrics_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/{}_ap_{}_{}.pdf'
+        number_of_tests, env_name, 'mean_results/b_{}_ap_{}_{}.pdf'
         .format(env_name, number_of_tests, start), do_action_planning=True,
         number_of_trials_explore=number_of_trials_explore,
         number_of_trials_exploit=number_of_trials_exploit)
@@ -232,7 +232,7 @@ if __name__ == "__main__":
     print("done with AP, time: {}, elapsed: {}".format(middle, middle - start))
 
     metrics_no_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/{}_no_ap_{}_{}.pdf'.
+        number_of_tests, env_name, 'mean_results/b_{}_no_ap_{}_{}.pdf'.
         format(env_name, number_of_tests, start), do_action_planning=False,
         number_of_trials_explore=number_of_trials_explore,
         number_of_trials_exploit=number_of_trials_exploit)
@@ -240,13 +240,13 @@ if __name__ == "__main__":
     end = datetime.datetime.now()
     print("done without AP, time: {}, elapsed: {}".format(end, end - middle))
 
-    plot_with_without_ap('mean_results/{}_both_{}_{}.pdf'.format(
+    plot_with_without_ap('mean_results/b_{}_both_{}_{}.pdf'.format(
         env_name, number_of_tests, start), metrics_ap, metrics_no_ap)
 
-    metrics_ap.to_csv('mean_results/{}_ap_{}_{}.csv'.
+    metrics_ap.to_csv('mean_results/b_{}_ap_{}_{}.csv'.
                       format(env_name, number_of_tests, start).
                       replace(' ', '_'))
 
-    metrics_no_ap.to_csv('mean_results/{}_no_ap_{}_{}.csv'.
+    metrics_no_ap.to_csv('mean_results/b_{}_no_ap_{}_{}.csv'.
                          format(env_name, number_of_tests, start).
                          replace(' ', '_'))
