@@ -200,7 +200,7 @@ def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
 if __name__ == "__main__":
     if len(sys.argv) < 5:
         print("Not enough args provided, using the defaults.")
-        env_name = 'Maze6-v0'
+        env_name = 'Woods14-v0'
         number_of_tests = 10
         number_of_trials_explore = 400
         number_of_trials_exploit = 10
