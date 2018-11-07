@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAZES=('Woods14-v0' 'MazeF4-v0' 'MazeF1-v0' 'MazeF2-v0' 'MazeF3-v0' 'Woods1-v0')
+MAZES=('MazeF3')
 num_el=6
 source venv/bin/activate
 cd examples/acs2/maze
