@@ -115,7 +115,7 @@ def choose_latest_action(cll, all_actions: int) -> Optional[int]:
     if len(cll) > 0:
         last_executed_cls = min(cll, key=lambda cl: cl.talp)
 
-        cll.sort(key=lambda cl: cl.action)
+        cll.sort(key=lambda cl: cl.action if isinstance(cl.action, int) else -1)
         for _action, _clss in groupby(cll, lambda cl: cl.action):
             number_of_cls_per_action[_action] = \
                 sum([cl.num for cl in _clss])
