@@ -1,15 +1,12 @@
 # Plot constants
 import datetime
-import os
-
 import gym
-# noinspection PyUnresolvedReferences
 import sys
 
 from examples.acs2.taxi.TaxiAdapter import TaxiAdapter
 from examples.acs2.taxi.acs2_in_taxi import taxi_metrics
 
-sys.path.append("/home/e-dzia/openai-envs/")
+# noinspection PyUnresolvedReferences
 import gym_taxi_goal
 
 from lcs.agents.acs2 import ACS2, ClassifiersList, Configuration
