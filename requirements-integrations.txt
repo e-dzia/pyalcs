@@ -2,6 +2,4 @@ jupyter==1.0.0
 matplotlib>=2.2
 gym>=0.10
 pandas>=0.21
-git+https://github.com/ParrotPrediction/openai-envs.git#egg=parrotprediction-openai-envs
-
-git+https://github.com/e-dzia/openai-envs.git@env/taxi
+git+https://github.com/e-dzia/openai-envs.git@env/taxi#egg=openai-envs-taxi
