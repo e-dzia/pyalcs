@@ -201,52 +201,56 @@ def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 6:
         print("Not enough args provided, using the defaults.")
         env_name = 'TaxiGoal-v0'
         number_of_tests = 1
-        number_of_trials_explore = 1000
+        number_of_trials_explore = 1500
         number_of_trials_exploit = 10
+        test_version = 0  # 0 - AP and no AP, 1 - AP, 2 - no AP
     else:
         env_name = sys.argv[1]
         number_of_tests = int(sys.argv[2])
         number_of_trials_explore = int(sys.argv[3])
         number_of_trials_exploit = int(sys.argv[4])
+        test_version = int(sys.argv[5])
 
-    print("Env: {}, Experiments: {}, Explore: {}, Exploit: {}".format(
+    print("Env: {}, Experiments: {}, Explore: {}, Exploit: {}, Test Version: {}".format(
           env_name, number_of_tests, number_of_trials_explore,
-          number_of_trials_exploit))
+          number_of_trials_exploit, test_version))
 
     #os.chdir("/".join(sys.argv[0].split("/")[:-1]))
 
     start = datetime.datetime.now()
     print("time start: {}".format(start))
 
-    metrics_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/{}_ap_{}_{}.pdf'
-        .format(env_name, number_of_tests, start), do_action_planning=True,
-        number_of_trials_explore=number_of_trials_explore,
-        number_of_trials_exploit=number_of_trials_exploit)
+    if test_version == 0 or test_version == 1:
+        metrics_ap = plot_handeye_mean(
+            number_of_tests, env_name, 'mean_results/{}_ap_{}_{}.pdf'
+            .format(env_name, number_of_tests, start), do_action_planning=True,
+            number_of_trials_explore=number_of_trials_explore,
+            number_of_trials_exploit=number_of_trials_exploit)
+
+        metrics_ap.to_csv('mean_results/{}_ap_{}_{}.csv'.
+                          format(env_name, number_of_tests, start).
+                          replace(' ', '_').replace(":", "-"))
 
     middle = datetime.datetime.now()
     print("done with AP, time: {}, elapsed: {}".format(middle, middle - start))
 
-    metrics_ap.to_csv('mean_results/{}_ap_{}_{}.csv'.
-                      format(env_name, number_of_tests, start).
-                      replace(' ', '_').replace(":", "-"))
+    if test_version == 0 or test_version == 2:
+        metrics_no_ap = plot_handeye_mean(
+            number_of_tests, env_name, 'mean_results/{}_no_ap_{}_{}.pdf'.
+            format(env_name, number_of_tests, start), do_action_planning=False,
+            number_of_trials_explore=number_of_trials_explore,
+            number_of_trials_exploit=number_of_trials_exploit)
 
-    metrics_no_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/{}_no_ap_{}_{}.pdf'.
-        format(env_name, number_of_tests, start), do_action_planning=False,
-        number_of_trials_explore=number_of_trials_explore,
-        number_of_trials_exploit=number_of_trials_exploit)
+        metrics_no_ap.to_csv('mean_results/{}_no_ap_{}_{}.csv'.
+                             format(env_name, number_of_tests, start).
+                             replace(' ', '_').replace(":", "-"))
 
     end = datetime.datetime.now()
     print("done without AP, time: {}, elapsed: {}".format(end, end - middle))
-
-    metrics_no_ap.to_csv('mean_results/{}_no_ap_{}_{}.csv'.
-                         format(env_name, number_of_tests, start).
-                         replace(' ', '_').replace(":", "-"))
 
     # plot_with_without_ap('mean_results/{}_both_{}_{}.pdf'.format(
     #     env_name, number_of_tests, start), metrics_ap, metrics_no_ap)
