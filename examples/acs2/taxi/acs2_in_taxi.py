@@ -19,18 +19,15 @@ logging.basicConfig(level=logging.INFO)
 
 def taxi_knowledge(population, environment) -> Dict:
     """
-    Analyzes all possible transition in maze environment and checks if there
+    Analyzes all possible transition in taxi environment and checks if there
     is a reliable classifier for it.
-
-    Note: knowledge with/without block only works if env has note_in_hand
-    set to True
 
     Parameters
     ----------
     population
         list of classifiers
     environment
-        handeye environment
+        taxi environment
 
     Returns
     -------
