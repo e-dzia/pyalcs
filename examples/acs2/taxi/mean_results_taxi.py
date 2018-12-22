@@ -15,6 +15,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import sys
+import os
 
 TITLE_TEXT_SIZE = 24
 AXIS_TEXT_SIZE = 18
@@ -216,6 +217,8 @@ if __name__ == "__main__":
           env_name, number_of_tests, number_of_trials_explore,
           number_of_trials_exploit, test_version))
 
+    if not os.path.exists("mean_results"):
+        os.makedirs("mean_results")
     #os.chdir("/".join(sys.argv[0].split("/")[:-1]))
 
     start = datetime.datetime.now()
