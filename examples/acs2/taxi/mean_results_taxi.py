@@ -224,7 +224,7 @@ if __name__ == "__main__":
         print("Not enough args provided, using the defaults.")
         env_name = 'TaxiGoal-v0'
         number_of_tests = 10
-        number_of_trials_explore = 1500
+        number_of_trials_explore = 1000
         number_of_trials_exploit = 10
         test_version = 1  # 0 - AP and no AP, 1 - AP, 2 - no AP
     else:
