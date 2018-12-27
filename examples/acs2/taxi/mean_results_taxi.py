@@ -144,13 +144,7 @@ def count_mean_values(i: int, metrics, mean_metrics):
         row_new['steps_in_trial'] = mean(i, row_mean, row, 'steps_in_trial')
         row_new['agent']['reliable'] = mean(i, row_mean, row,
                                             'agent', 'reliable')
-        reward = row['reward']
         row_new['reward'] = mean(i, row_mean, row, 'reward')
-        if i > 1:
-            row_new['reward_cumulative'] = row_mean['reward_cumulative'] \
-                                           + reward
-        else:
-            row_new['reward_cumulative'] = row_mean['reward'] + reward
     return new_metrics
 
 
