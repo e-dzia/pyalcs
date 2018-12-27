@@ -2,6 +2,7 @@
 import datetime
 import gym
 import sys
+from copy import deepcopy
 
 from examples.acs2.taxi.TaxiAdapter import TaxiAdapter
 from examples.acs2.taxi.acs2_in_taxi import taxi_metrics
@@ -135,7 +136,7 @@ def mean_cumulative(mean_value, value):
 
 
 def count_mean_values(i: int, metrics, mean_metrics):
-    new_metrics = metrics.copy()
+    new_metrics = deepcopy(mean_metrics)
     for row, row_new, row_mean in zip(metrics, new_metrics, mean_metrics):
         row_new['knowledge']['knowledge'] = mean(i, row_mean, row,
                                                  'knowledge', 'knowledge')
@@ -144,8 +145,22 @@ def count_mean_values(i: int, metrics, mean_metrics):
         row_new['steps_in_trial'] = mean(i, row_mean, row, 'steps_in_trial')
         row_new['agent']['reliable'] = mean(i, row_mean, row,
                                             'agent', 'reliable')
+        reward = row['reward']
+        trial = row['trial']
         row_new['reward'] = mean(i, row_mean, row, 'reward')
-    return new_metrics
+        if trial == 0:
+            row['reward_cumulative'] = reward
+            row_mean['reward_cumulative'] = row_mean['reward']
+        elif i > 1:
+            row['reward_cumulative'] = \
+                mean_metrics[trial-1]['reward_cumulative'] + reward
+        else:
+            row['reward_cumulative'] = metrics[trial-1]['reward'] + reward
+            row_mean['reward_cumulative'] = mean_metrics[trial]['reward'] \
+                                            + mean_metrics[trial-1]['reward_cumulative']
+        row_new['reward_cumulative'] = mean(i, row_mean, row,
+                                            'reward_cumulative')
+    return metrics
 
 
 def plot_handeye_mean(number_of_tests=50, env_name='HandEye3-v0',
@@ -208,9 +223,9 @@ if __name__ == "__main__":
     if len(sys.argv) < 6:
         print("Not enough args provided, using the defaults.")
         env_name = 'TaxiGoal-v0'
-        number_of_tests = 5
-        number_of_trials_explore = 5
-        number_of_trials_exploit = 1
+        number_of_tests = 10
+        number_of_trials_explore = 1500
+        number_of_trials_exploit = 10
         test_version = 1  # 0 - AP and no AP, 1 - AP, 2 - no AP
     else:
         env_name = sys.argv[1]

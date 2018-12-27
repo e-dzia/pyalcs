@@ -36,6 +36,7 @@ class ACS2(Agent):
         state = self.cfg.environment_adapter.to_genotype(raw_state)
         action = env.action_space.sample()
         reward = 0
+        sum_reward = 0
         prev_state = Perception.empty()
         action_set = ClassifiersList()
         done = False
@@ -49,6 +50,7 @@ class ACS2(Agent):
                                               prev_state, action_set, action,
                                               reward)
                 steps += steps_ap
+                sum_reward += reward
 
             match_set = self.population.form_match_set(state)
 
@@ -96,6 +98,7 @@ class ACS2(Agent):
             prev_state = state
             raw_state, reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
+            sum_reward += reward
 
             if done:
                 ClassifiersList.apply_alp(
@@ -130,7 +133,8 @@ class ACS2(Agent):
 
             steps += 1
 
-        return TrialMetrics(steps, reward)
+        # TODO: reward instead of sum_reward
+        return TrialMetrics(steps, sum_reward)
 
     def _run_trial_exploit(self, env, time=None, current_trial=None) \
             -> TrialMetrics:
@@ -142,6 +146,7 @@ class ACS2(Agent):
         state = self.cfg.environment_adapter.to_genotype(raw_state)
 
         reward = 0
+        sum_reward = 0
         action_set = ClassifiersList()
         done = False
 
@@ -166,6 +171,7 @@ class ACS2(Agent):
 
             raw_state, reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
+            sum_reward += reward
 
             if done:
                 ClassifiersList.apply_reinforcement_learning(
@@ -173,7 +179,8 @@ class ACS2(Agent):
 
             steps += 1
 
-        return TrialMetrics(steps, reward)
+        # TODO: reward instead of sum_reward
+        return TrialMetrics(steps, sum_reward)
 
     def _run_action_planning(self,
                              env,
