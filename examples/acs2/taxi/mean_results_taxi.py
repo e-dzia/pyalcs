@@ -26,6 +26,7 @@ def parse_metrics_to_df(explore_metrics, exploit_metrics):
     def extract_details(row):
         row['trial'] = row['trial']
         row['steps'] = row['steps_in_trial']
+        row['reward'] = row['reward']
         row['numerosity'] = row['agent']['numerosity']
         row['reliable'] = row['agent']['reliable']
         row['knowledge'] = row['knowledge']['knowledge']
@@ -129,6 +130,10 @@ def mean(i, row_mean, row, first, second=None):
         return (row_mean[first] * i + row[first]) / (i + 1)
 
 
+def mean_cumulative(mean_value, value):
+    return mean_value + value
+
+
 def count_mean_values(i: int, metrics, mean_metrics):
     new_metrics = metrics.copy()
     for row, row_new, row_mean in zip(metrics, new_metrics, mean_metrics):
@@ -139,6 +144,13 @@ def count_mean_values(i: int, metrics, mean_metrics):
         row_new['steps_in_trial'] = mean(i, row_mean, row, 'steps_in_trial')
         row_new['agent']['reliable'] = mean(i, row_mean, row,
                                             'agent', 'reliable')
+        reward = row['reward']
+        row_new['reward'] = mean(i, row_mean, row, 'reward')
+        if i > 1:
+            row_new['reward_cumulative'] = row_mean['reward_cumulative'] \
+                                           + reward
+        else:
+            row_new['reward_cumulative'] = row_mean['reward'] + reward
     return new_metrics
 
 
@@ -202,10 +214,10 @@ if __name__ == "__main__":
     if len(sys.argv) < 6:
         print("Not enough args provided, using the defaults.")
         env_name = 'TaxiGoal-v0'
-        number_of_tests = 1
-        number_of_trials_explore = 1500
-        number_of_trials_exploit = 10
-        test_version = 0  # 0 - AP and no AP, 1 - AP, 2 - no AP
+        number_of_tests = 5
+        number_of_trials_explore = 5
+        number_of_trials_exploit = 1
+        test_version = 1  # 0 - AP and no AP, 1 - AP, 2 - no AP
     else:
         env_name = sys.argv[1]
         number_of_tests = int(sys.argv[2])
