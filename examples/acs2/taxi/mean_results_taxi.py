@@ -225,7 +225,7 @@ if __name__ == "__main__":
         env_name = 'TaxiGoal-v0'
         number_of_tests = 10
         number_of_trials_explore = 1000
-        number_of_trials_exploit = 10
+        number_of_trials_exploit = 100
         test_version = 1  # 0 - AP and no AP, 1 - AP, 2 - no AP
     else:
         env_name = sys.argv[1]
