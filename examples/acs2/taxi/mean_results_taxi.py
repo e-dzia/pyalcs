@@ -173,6 +173,7 @@ def plot_handeye_mean(number_of_tests=50, env_name='HandEye3-v0',
                         epsilon=1.0,
                         do_ga=False,
                         do_action_planning=do_action_planning,
+                        action_planning_frequency=30,
                         metrics_trial_frequency=1,
                         environment_adapter=TaxiAdapter,
                         user_metrics_collector_fcn=taxi_metrics)
