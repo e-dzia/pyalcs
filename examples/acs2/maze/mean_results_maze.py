@@ -1,9 +1,13 @@
 # Plot constants
+import argparse
 import datetime
 import os
 
 import gym
 import sys
+
+from examples.acs2.maze.acs2_in_maze import maze_metrics
+
 sys.path.insert(0, '/home/e-dzia/openai-envs')
 # noinspection PyUnresolvedReferences
 import gym_maze
@@ -15,8 +19,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import sys
 
-from examples.acs2.maze.utils import calculate_performance
-
 TITLE_TEXT_SIZE = 24
 AXIS_TEXT_SIZE = 18
 LEGEND_TEXT_SIZE = 16
@@ -24,11 +26,11 @@ LEGEND_TEXT_SIZE = 16
 
 def parse_metrics_to_df(explore_metrics, exploit_metrics):
     def extract_details(row):
-        row['trial'] = row['agent']['trial']
-        row['steps'] = row['agent']['steps']
-        row['numerosity'] = row['agent']['numerosity']
-        row['reliable'] = row['agent']['reliable']
-        row['knowledge'] = row['performance']['knowledge']
+        row['trial'] = row['trial']
+        row['steps'] = row['steps_in_trial']
+        row['numerosity'] = row['population']['numerosity']
+        row['reliable'] = row['population']['reliable']
+        row['knowledge'] = row['knowledge']
         return row
 
     # Load both metrics into data frame
@@ -49,7 +51,7 @@ def parse_metrics_to_df(explore_metrics, exploit_metrics):
 
     # Concatenate both dataframes
     df = pd.concat([explore_df, exploit_df])
-    df.drop(['agent', 'environment', 'performance'], axis=1, inplace=True)
+    df.drop(['population'], axis=1, inplace=True)
     df.set_index('trial', inplace=True)
 
     return df
@@ -122,38 +124,39 @@ def plot_both_performances(metrics_ap, metrics_no_ap, env_name,
     plt.subplots_adjust(top=0.86, wspace=0.3, hspace=0.3)
 
 
-def mean(i, row_mean, row, first, second):
-    return (row_mean[first][second] * i + row[first][second]) / (i + 1)
+def mean(i, row_mean, row, first, second=None):
+    if second is not None:
+        return (row_mean[first][second] * i + row[first][second]) / (i + 1)
+    else:
+        return (row_mean[first] * i + row[first]) / (i + 1)
 
 
 def count_mean_values(i: int, metrics, mean_metrics):
     new_metrics = metrics.copy()
     for row, row_new, row_mean in zip(metrics, new_metrics, mean_metrics):
-        row_new['performance']['knowledge'] = mean(i, row_mean, row,
-                                                   'performance', 'knowledge')
-        row_new['agent']['numerosity'] = mean(i, row_mean, row,
-                                              'agent', 'numerosity')
-        row_new['agent']['steps'] = mean(i, row_mean, row,
-                                         'agent', 'steps')
-        row_new['agent']['reliable'] = mean(i, row_mean, row,
-                                            'agent', 'reliable')
+        row_new['knowledge'] = mean(i, row_mean, row, 'knowledge')
+        row_new['population']['numerosity'] = mean(i, row_mean, row,
+                                                   'population', 'numerosity')
+        row_new['steps_in_trial'] = mean(i, row_mean, row, 'steps_in_trial')
+        row_new['population']['reliable'] = mean(i, row_mean, row,
+                                                 'population', 'reliable')
     return new_metrics
 
 
-def plot_handeye_mean(number_of_tests=50, env_name='BMaze4-v0',
-                      filename='mean_results/BMaze4-v0.pdf',
+def plot_handeye_mean(number_of_tests=50, env_name='Maze4-v0',
+                      filename='mean_results/Maze4-v0.pdf',
                       do_action_planning=True,
                       number_of_trials_explore=30,
-                      number_of_trials_exploit=10):
+                      number_of_trials_exploit=10, theta_r=90):
     hand_eye = gym.make(env_name)
     cfg = Configuration(hand_eye.observation_space.n, hand_eye.action_space.n,
                         epsilon=1.0,
-                        theta_r=75,
+                        theta_r=theta_r,
                         do_ga=False,
                         do_action_planning=do_action_planning,
                         action_planning_frequency=30,
-                        user_metrics_collector_fcn=calculate_performance,
-                        performance_fcn=calculate_performance)
+                        metrics_trial_frequency=1,
+                        user_metrics_collector_fcn=maze_metrics)
 
     mean_metrics_he_exploit = []
     mean_metrics_he_explore = []
@@ -179,16 +182,16 @@ def plot_handeye_mean(number_of_tests=50, env_name='BMaze4-v0',
 
     he_metrics_df = parse_metrics_to_df(mean_metrics_he_explore,
                                         mean_metrics_he_exploit)
-    if do_action_planning:
-        with_ap = ", with Action Planning"
-    else:
-        with_ap = ", without Action Planning"
+    # if do_action_planning:
+    #     with_ap = ", with Action Planning"
+    # else:
+    #     with_ap = ", without Action Planning"
 
-    plot_performance(he_metrics_df, env_name,
-                     '\nmean for {} experiments'.format(number_of_tests),
-                     with_ap)
-    plt.savefig(filename.replace(" ", "_").replace(':', '.'),
-                format='pdf', dpi=100)
+    # plot_performance(he_metrics_df, env_name,
+    #                  '\nmean for {} experiments'.format(number_of_tests),
+    #                  with_ap)
+    # plt.savefig(filename.replace(" ", "_").replace(':', '.'),
+    #             format='pdf', dpi=100)
     return he_metrics_df
 
 
@@ -200,54 +203,63 @@ def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 5:
-        print("Not enough args provided, using the defaults.")
-        env_name = 'Maze4-v0'
-        number_of_tests = 10
-        number_of_trials_explore = 400
-        number_of_trials_exploit = 10
-    else:
-        env_name = sys.argv[1]
-        number_of_tests = int(sys.argv[2])
-        number_of_trials_explore = int(sys.argv[3])
-        number_of_trials_exploit = int(sys.argv[4])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--environment", default="Maze4-v0")
+    parser.add_argument("-n", "--num-tests", default=10, type=int)
+    parser.add_argument("--explore-trials", default=400, type=int)
+    parser.add_argument("--exploit-trials", default=10, type=int)
+    parser.add_argument("--theta-r", default=0.90, type=float)
+    parser.add_argument("--tests-type", default=2, type=int) # 0 - ap,
+                                                        # 1 - no ap, 2 - both
+    args = parser.parse_args()
+
+    env_name = args.environment
+    number_of_tests = args.num_tests
+    number_of_trials_explore = args.explore_trials
+    number_of_trials_exploit = args.exploit_trials
+    theta_r = args.theta_r
+    tests_type = args.tests_type
+
+    if tests_type > 2 or tests_type < 0:
+        tests_type = 2
 
     print("Env: {}, Experiments: {}, Explore: {}, Exploit: {}".format(
           env_name, number_of_tests, number_of_trials_explore,
           number_of_trials_exploit))
 
-    #os.chdir("/".join(sys.argv[0].split("/")[:-1]))
+    if not os.path.exists("mean_results"):
+        os.makedirs("mean_results")
 
     start = datetime.datetime.now()
     print("time start: {}".format(start))
 
-    metrics_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/b30_{}_ap_{}_{}.pdf'
-        .format(env_name, number_of_tests, start).replace(' ', '_').
-        replace(':', '.'), do_action_planning=True,
-        number_of_trials_explore=number_of_trials_explore,
-        number_of_trials_exploit=number_of_trials_exploit)
+    if tests_type == 0 or tests_type == 2:
+        metrics_ap = plot_handeye_mean(
+            number_of_tests, env_name, do_action_planning=True,
+            number_of_trials_explore=number_of_trials_explore,
+            number_of_trials_exploit=number_of_trials_exploit,
+            theta_r=theta_r)
+
+        metrics_ap.to_csv('mean_results/{}_{}_ap_{}_{}.csv'.
+                          format(theta_r, env_name, number_of_tests, start).
+                          replace(' ', '_').replace(':', '.'))
 
     middle = datetime.datetime.now()
     print("done with AP, time: {}, elapsed: {}".format(middle, middle - start))
 
-    metrics_ap.to_csv('mean_results/b30_{}_ap_{}_{}.csv'.
-                      format(env_name, number_of_tests, start).
-                      replace(' ', '_').replace(':', '.'))
+    if tests_type == 1 or tests_type == 2:
+        metrics_no_ap = plot_handeye_mean(
+            number_of_tests, env_name, do_action_planning=False,
+            number_of_trials_explore=number_of_trials_explore,
+            number_of_trials_exploit=number_of_trials_exploit,
+            theta_r=theta_r)
 
-    metrics_no_ap = plot_handeye_mean(
-        number_of_tests, env_name, 'mean_results/b30_{}_no_ap_{}_{}.pdf'.
-        format(env_name, number_of_tests, start).replace(' ', '_').
-        replace(':', '.'), do_action_planning=False,
-        number_of_trials_explore=number_of_trials_explore,
-        number_of_trials_exploit=number_of_trials_exploit)
+        metrics_no_ap.to_csv('mean_results/{}_{}_no_ap_{}_{}.csv'.
+                             format(theta_r, env_name, number_of_tests, start).
+                             replace(' ', '_').replace(':', '.'))
 
     end = datetime.datetime.now()
     print("done without AP, time: {}, elapsed: {}".format(end, end - middle))
-
-    metrics_no_ap.to_csv('mean_results/b30_{}_no_ap_{}_{}.csv'.
-                         format(env_name, number_of_tests, start).
-                         replace(' ', '_').replace(':', '.'))
 
     # plot_with_without_ap('mean_results/b30_{}_both_{}_{}.pdf'.format(
     #    env_name, number_of_tests, start).replace(' ', '_').replace(':', '.'),

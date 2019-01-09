@@ -9,6 +9,8 @@ from examples.acs2.maze.utils import maze_knowledge
 from lcs.agents.acs2 import ACS2, Configuration
 
 # Configure logger
+from lcs.metrics import population_metrics
+
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def maze_metrics(population, environment):
     return {
-        'population': len(population),
+        'population': population_metrics(population, environment),
         'knowledge': maze_knowledge(population, environment)
     }
 
