@@ -24,12 +24,12 @@ class ClassifiersList(TypedList):
         return ClassifiersList(*matching)
 
     def form_match_set_backwards(self,
-                                 situation: Perception) -> ClassifiersList:
+                                 situation: Perception) -> "ClassifiersList":
 
         matching = [cl for cl in self if cl.does_match_backwards(situation)]
         return ClassifiersList(*matching)
 
-    def form_action_set(self, action: int) -> ClassifiersList:
+    def form_action_set(self, action: int) -> "ClassifiersList":
         matching = [cl for cl in self if cl.action == action]
         return ClassifiersList(*matching)
 
