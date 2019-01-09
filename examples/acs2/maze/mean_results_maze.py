@@ -148,6 +148,7 @@ def plot_handeye_mean(number_of_tests=50, env_name='BMaze4-v0',
     hand_eye = gym.make(env_name)
     cfg = Configuration(hand_eye.observation_space.n, hand_eye.action_space.n,
                         epsilon=1.0,
+                        theta_r=75,
                         do_ga=False,
                         do_action_planning=do_action_planning,
                         action_planning_frequency=30,
@@ -200,9 +201,9 @@ def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
 if __name__ == "__main__":
     if len(sys.argv) < 5:
         print("Not enough args provided, using the defaults.")
-        env_name = 'MazeF3-v0'
+        env_name = 'Maze4-v0'
         number_of_tests = 10
-        number_of_trials_explore = 800
+        number_of_trials_explore = 400
         number_of_trials_exploit = 10
     else:
         env_name = sys.argv[1]
@@ -247,6 +248,6 @@ if __name__ == "__main__":
                          format(env_name, number_of_tests, start).
                          replace(' ', '_').replace(':', '.'))
 
-    plot_with_without_ap('mean_results/b30_{}_both_{}_{}.pdf'.format(
-        env_name, number_of_tests, start).replace(' ', '_').replace(':', '.'),
-                         metrics_ap, metrics_no_ap)
+    # plot_with_without_ap('mean_results/b30_{}_both_{}_{}.pdf'.format(
+    #    env_name, number_of_tests, start).replace(' ', '_').replace(':', '.'),
+    #                     metrics_ap, metrics_no_ap)
