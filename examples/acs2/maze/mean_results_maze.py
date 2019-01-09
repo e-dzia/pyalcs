@@ -223,9 +223,10 @@ if __name__ == "__main__":
     if tests_type > 2 or tests_type < 0:
         tests_type = 2
 
-    print("Env: {}, Experiments: {}, Explore: {}, Exploit: {}".format(
+    print("Env: {}, Experiments: {}, Explore: {}, Exploit: {},"
+          "Theta_r: {}, Tests: {}".format(
           env_name, number_of_tests, number_of_trials_explore,
-          number_of_trials_exploit))
+          number_of_trials_exploit, theta_r, tests_type))
 
     if not os.path.exists("mean_results"):
         os.makedirs("mean_results")
