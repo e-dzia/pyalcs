@@ -1,3 +1,8 @@
+
+from __future__ import annotations
+
+import logging
+
 import random
 from typing import Optional, Union, Callable, List
 
@@ -5,14 +10,21 @@ from lcs import Perception
 from . import Configuration, Condition, Effect, PMark
 
 
+logger = logging.getLogger(__name__)
+
+
 class Classifier(object):
+
+    __slots__ = ['condition', 'action', 'effect', 'mark', 'q', 'r',
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'ee', 'cfg']
+
     def __init__(self,
                  condition: Union[Condition, str, None]=None,
                  action: Optional[int]=None,
                  effect: Union[Effect, str, None]=None,
                  quality: float=0.5,
                  reward: float=0.5,
-                 intermediate_reward: float=0.0,
+                 immediate_reward: float=0.0,
                  numerosity: int=1,
                  experience: int=1,
                  talp=None,
@@ -46,8 +58,8 @@ class Classifier(object):
         # the execution of action A given condition C
         self.r = reward
 
-        # Intermediate reward
-        self.ir = intermediate_reward
+        # Immediate reward
+        self.ir = immediate_reward
 
         # Numerosity
         self.num = numerosity
@@ -63,8 +75,9 @@ class Classifier(object):
         # Application average
         self.tav = tav
 
-        # I don't know yet what it is
-        self.ee = 0
+        # TODO: not used yet
+        # Whether classifier is enhanceable
+        self.ee = False
 
     def __eq__(self, other):
         if self.condition == other.condition and \
@@ -78,10 +91,13 @@ class Classifier(object):
         return hash((str(self.condition), self.action, str(self.effect)))
 
     def __repr__(self):
-        return "{}-{}-{} @ {}".format(self.condition,
-                                      self.action,
-                                      self.effect,
-                                      hex(id(self)))
+        return f"{self.condition} " \
+               f"{self.action} " \
+               f"{str(self.effect):16} " \
+               f"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
+               f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
+               f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
+               f"tav: {self.tav:<6.3} num: {self.num}"
 
     @classmethod
     def copy_from(cls, old_cls: "Classifier", time: int):
@@ -103,12 +119,13 @@ class Classifier(object):
             copied classifier
         """
         new_cls = cls(
-            condition=Condition(old_cls.condition, old_cls.cfg),
+            condition=Condition(old_cls.condition,
+                                old_cls.cfg.classifier_wildcard),
             action=old_cls.action,
             effect=old_cls.effect,
             quality=old_cls.q,
             reward=old_cls.r,
-            intermediate_reward=old_cls.ir,
+            immediate_reward=old_cls.ir,
             cfg=old_cls.cfg)
 
         new_cls.tga = time
@@ -181,10 +198,7 @@ class Classifier(object):
                    leave_specialized=False) -> None:
         """
         Specializes the effect part where necessary to correctly anticipate
-        the changes from p0 to p1 and returns a condition which specifies
-        the attributes which must be specified in the condition part.
-        The specific attributes in the returned conditions are set to
-        the necessary values.
+        the changes from p0 to p1.
 
         Parameters
         ----------
@@ -284,7 +298,7 @@ class Classifier(object):
             current situation
         """
         if self.mark.set_mark_using_condition(self.condition, perception):
-            self.ee = 0
+            self.ee = False
 
     def set_alp_timestamp(self, time: int) -> None:
         """

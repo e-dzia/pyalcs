@@ -19,7 +19,7 @@ class Condition(PerceptionString):
         int
             Number of not generic (wildcards) attributes
         """
-        return sum(1 for comp in self if comp != self.wildcard)
+        return sum(1 for attr in self if attr != self.wildcard)
 
     def specialize_with_condition(self, other: "Condition") -> None:
         for idx, new_el in enumerate(other):
@@ -67,7 +67,7 @@ class Condition(PerceptionString):
 
         return True
 
-    def does_match_condition(self, other: "Condition") -> bool:
+    def subsumes(self, other: Condition) -> bool:
         return self.does_match(other)
 
     def get_backwards_anticipation(self, perception: Perception) -> Perception:
