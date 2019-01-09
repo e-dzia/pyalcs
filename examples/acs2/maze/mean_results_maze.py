@@ -152,6 +152,7 @@ def plot_handeye_mean(number_of_tests=50, env_name='BMaze4-v0',
                         do_ga=False,
                         do_action_planning=do_action_planning,
                         action_planning_frequency=30,
+                        user_metrics_collector_fcn=calculate_performance,
                         performance_fcn=calculate_performance)
 
     mean_metrics_he_exploit = []
