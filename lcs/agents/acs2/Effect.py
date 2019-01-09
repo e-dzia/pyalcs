@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from lcs import Perception
 from .. import PerceptionString
 
@@ -104,5 +102,5 @@ class Effect(PerceptionString):
                 return False
         return True
 
-    def subsumes(self, other: Effect) -> bool:
+    def subsumes(self, other: "Effect") -> bool:
         return self == other
