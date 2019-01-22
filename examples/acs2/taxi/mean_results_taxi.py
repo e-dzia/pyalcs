@@ -186,9 +186,9 @@ def plot_handeye_mean(number_of_tests=50, env_name='HandEye3-v0',
         # the below line can be un-commented for experiments
         print(i, datetime.datetime.now())
 
-        # explore
+        # explore-exploit
         agent_he = ACS2(cfg)
-        population_he_explore, metrics_he_explore = agent_he.explore(
+        population_he_explore, metrics_he_explore = agent_he.explore_exploit(
             hand_eye, number_of_trials_explore)
 
         # exploit
