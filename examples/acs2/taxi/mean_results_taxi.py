@@ -1,4 +1,5 @@
 # Plot constants
+import argparse
 import datetime
 import gym
 import sys
@@ -164,15 +165,15 @@ def count_mean_values(i: int, metrics, mean_metrics):
 
 
 def plot_handeye_mean(number_of_tests=50, env_name='HandEye3-v0',
-                      filename='mean_results/handeye.pdf',
                       do_action_planning=True,
                       number_of_trials_explore=50,
-                      number_of_trials_exploit=10):
-    hand_eye = gym.make(env_name)
+                      number_of_trials_exploit=10,
+                      theta_r=0.9):
+    env = gym.make(env_name)
     cfg = Configuration(1, 6,
                         epsilon=1.0,
                         do_ga=False,
-                        theta_r=0.75,
+                        theta_r=theta_r,
                         do_action_planning=do_action_planning,
                         action_planning_frequency=30,
                         metrics_trial_frequency=1,
@@ -189,11 +190,11 @@ def plot_handeye_mean(number_of_tests=50, env_name='HandEye3-v0',
         # explore-exploit
         agent_he = ACS2(cfg)
         population_he_explore, metrics_he_explore = agent_he.explore_exploit(
-            hand_eye, number_of_trials_explore)
+            env, number_of_trials_explore)
 
         # exploit
         agent_he = ACS2(cfg, population_he_explore)
-        _, metrics_he_exploit = agent_he.exploit(hand_eye,
+        _, metrics_he_exploit = agent_he.exploit(env,
                                                  number_of_trials_exploit)
 
         mean_metrics_he_explore = count_mean_values(i, metrics_he_explore,
@@ -203,15 +204,6 @@ def plot_handeye_mean(number_of_tests=50, env_name='HandEye3-v0',
 
     he_metrics_df = parse_metrics_to_df(mean_metrics_he_explore,
                                         mean_metrics_he_exploit)
-    if do_action_planning:
-        with_ap = ", with Action Planning"
-    else:
-        with_ap = ", without Action Planning"
-
-    plot_performance(he_metrics_df, env_name,
-                     '\nmean for {} experiments'.format(number_of_tests),
-                     with_ap)
-    # plt.savefig(filename.replace(" ", "_").replace(":", "-"), format='pdf', dpi=100)
     return he_metrics_df
 
 
@@ -222,58 +214,65 @@ def plot_with_without_ap(filename, metrics_ap, metrics_no_ap):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 6:
-        print("Not enough args provided, using the defaults.")
-        env_name = 'TaxiGoal-v0'
-        number_of_tests = 10
-        number_of_trials_explore = 1000
-        number_of_trials_exploit = 100
-        test_version = 1  # 0 - AP and no AP, 1 - AP, 2 - no AP
-    else:
-        env_name = sys.argv[1]
-        number_of_tests = int(sys.argv[2])
-        number_of_trials_explore = int(sys.argv[3])
-        number_of_trials_exploit = int(sys.argv[4])
-        test_version = int(sys.argv[5])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--environment", default="TaxiGoal-v0")
+    parser.add_argument("-n", "--num-tests", default=10, type=int)
+    parser.add_argument("--explore-trials", default=4000, type=int)
+    parser.add_argument("--exploit-trials", default=10, type=int)
+    parser.add_argument("--theta-r", default=0.90, type=float)
+    parser.add_argument("--tests-type", default=2, type=int) # 0 - ap,
+                                                        # 1 - no ap, 2 - both
+    args = parser.parse_args()
 
-    print("Env: {}, Experiments: {}, Explore: {}, Exploit: {}, Test Version: {}".format(
+    env_name = args.environment
+    number_of_tests = args.num_tests
+    number_of_trials_explore = args.explore_trials
+    number_of_trials_exploit = args.exploit_trials
+    theta_r = args.theta_r
+    tests_type = args.tests_type
+
+    if tests_type > 2 or tests_type < 0:
+        tests_type = 2
+
+    print("Env: {}, Experiments: {}, Explore: {}, Exploit: {},"
+          "Theta_r: {}, Tests: {}".format(
           env_name, number_of_tests, number_of_trials_explore,
-          number_of_trials_exploit, test_version))
+          number_of_trials_exploit, theta_r, tests_type))
 
     if not os.path.exists("mean_results"):
         os.makedirs("mean_results")
-    #os.chdir("/".join(sys.argv[0].split("/")[:-1]))
 
     start = datetime.datetime.now()
     print("time start: {}".format(start))
 
-    if test_version == 0 or test_version == 1:
+    if tests_type == 0 or tests_type == 2:
         metrics_ap = plot_handeye_mean(
-            number_of_tests, env_name, 'mean_results/{}_ap_{}_{}.pdf'
-            .format(env_name, number_of_tests, start), do_action_planning=True,
+            number_of_tests, env_name, do_action_planning=True,
             number_of_trials_explore=number_of_trials_explore,
-            number_of_trials_exploit=number_of_trials_exploit)
+            number_of_trials_exploit=number_of_trials_exploit,
+            theta_r=theta_r)
 
-        metrics_ap.to_csv('mean_results/{}_ap_{}_{}.csv'.
-                          format(env_name, number_of_tests, start).
-                          replace(' ', '_').replace(":", "-"))
+        metrics_ap.to_csv('mean_results/{}_{}_ap_{}_{}.csv'.
+                          format(theta_r, env_name, number_of_tests, start).
+                          replace(' ', '_').replace(':', '.'))
 
     middle = datetime.datetime.now()
     print("done with AP, time: {}, elapsed: {}".format(middle, middle - start))
 
-    if test_version == 0 or test_version == 2:
+    if tests_type == 1 or tests_type == 2:
         metrics_no_ap = plot_handeye_mean(
-            number_of_tests, env_name, 'mean_results/{}_no_ap_{}_{}.pdf'.
-            format(env_name, number_of_tests, start), do_action_planning=False,
+            number_of_tests, env_name, do_action_planning=False,
             number_of_trials_explore=number_of_trials_explore,
-            number_of_trials_exploit=number_of_trials_exploit)
+            number_of_trials_exploit=number_of_trials_exploit,
+            theta_r=theta_r)
 
-        metrics_no_ap.to_csv('mean_results/{}_no_ap_{}_{}.csv'.
-                             format(env_name, number_of_tests, start).
-                             replace(' ', '_').replace(":", "-"))
+        metrics_no_ap.to_csv('mean_results/{}_{}_no_ap_{}_{}.csv'.
+                             format(theta_r, env_name, number_of_tests, start).
+                             replace(' ', '_').replace(':', '.'))
 
     end = datetime.datetime.now()
     print("done without AP, time: {}, elapsed: {}".format(end, end - middle))
 
-    # plot_with_without_ap('mean_results/{}_both_{}_{}.pdf'.format(
-    #     env_name, number_of_tests, start), metrics_ap, metrics_no_ap)
+    # plot_with_without_ap('mean_results/b30_{}_both_{}_{}.pdf'.format(
+    #    env_name, number_of_tests, start).replace(' ', '_').replace(':', '.'),
+    #                     metrics_ap, metrics_no_ap)
