@@ -107,7 +107,7 @@ class Agent:
         current_trial = 0
         steps = 0
 
-        metrics: List = []
+        metrics = []
         while current_trial < max_trials:
             steps_in_trial, reward = func(env, steps, current_trial)
             steps += steps_in_trial

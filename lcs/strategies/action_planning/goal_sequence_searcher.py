@@ -205,7 +205,7 @@ class GoalSequenceSearcher:
         sequence_size += 1
 
         # construct sequence
-        act_seq: list = [-1] * sequence_size
+        act_seq = [-1] * sequence_size
         j = 0
         if i > 0:
             for j, cl in enumerate(self.forward_classifiers[i - 1]):
@@ -241,7 +241,7 @@ class GoalSequenceSearcher:
         sequence_size += 1
 
         # construct sequence
-        act_seq: list = [-1] * sequence_size
+        act_seq = [-1] * sequence_size
         j = 0
         if forward_sequence_idx > 0:
             for j, cl in enumerate(self.forward_classifiers[

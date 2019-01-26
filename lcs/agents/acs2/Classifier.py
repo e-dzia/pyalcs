@@ -87,13 +87,13 @@ class Classifier(object):
         return hash((str(self.condition), self.action, str(self.effect)))
 
     def __repr__(self):
-        return f"{self.condition} " \
-               f"{self.action} " \
-               f"{str(self.effect):16} " \
-               f"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
-               f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
-               f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
-               f"tav: {self.tav:<6.3} num: {self.num}"
+        return "." #"{self.condition} " \
+               #"{self.action} " \
+               #"{str(self.effect):16} " \
+               #"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
+               #"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
+               #"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
+               #"tav: {self.tav:<6.3} num: {self.num}"
 
     @classmethod
     def copy_from(cls, old_cls: "Classifier", time: int):

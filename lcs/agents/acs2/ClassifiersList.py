@@ -96,7 +96,7 @@ class ClassifiersList(TypedList):
 
         """
         new_list = ClassifiersList()
-        new_cl: Optional[Classifier] = None
+        new_cl = None
         was_expected_case = False
         delete_count = 0
 

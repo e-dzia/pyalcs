@@ -30,7 +30,7 @@ class TypedList(collections.abc.MutableSequence):
         self._items.sort(*args, **kwargs)
 
     def __repr__(self):
-        return f"{len(self._items)} items"
+        return "{} items".format(len(self._items))
 
     def __setitem__(self, i, o):
         check_types(self.oktypes, o)
